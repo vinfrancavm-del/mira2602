@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Leitor Simples</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Header minimalista (apenas info, não interativo) -->
+  <header class="app-header">
+    <div class="header-content">
+      <h1>📖 Leitor Simples</h1>
+      <span class="badge">PWA</span>
+    </div>
+  </header>
+
+  <!-- Área principal de conteúdo -->
+  <main class="main-content" id="mainContent">
+    <!-- Tela de boas-vindas / lista vazia -->
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">📰</div>
+      <h2>Nenhuma matéria ainda</h2>
+      <p>Adicione textos de matérias para ler de forma simplificada e acessível.</p>
+    </div>
+
+    <!-- Lista de matérias salvas -->
+    <div class="articles-list" id="articlesList" style="display:none;"></div>
+
+    <!-- Tela de leitura -->
+    <div class="reader-view" id="readerView" style="display:none;">
+      <article class="article-content" id="articleContent">
+        <h1 id="readerTitle"></h1>
+        <div class="article-meta" id="readerMeta"></div>
+        <div class="article-body" id="readerBody"></div>
+      </article>
+    </div>
+
+    <!-- Tela de adicionar -->
+    <div class="add-view" id="addView" style="display:none;">
+      <h2>✏️ Nova Matéria</h2>
+      <div class="form-group">
+        <label for="articleTitle">Título</label>
+        <input type="text" id="articleTitle" placeholder="Digite o título da matéria">
+      </div>
+      <div class="form-group">
+        <label for="articleAuthor">Autor / Fonte (opcional)</label>
+        <input type="text" id="articleAuthor" placeholder="Ex: BBC News">
+      </div>
+      <div class="form-group">
+        <label for="articleText">Texto da matéria</label>
+        <textarea id="articleText" rows="12" placeholder="Cole aqui o texto da matéria..."></textarea>
+      </div>
+      <button class="btn-primary btn-full" onclick="saveArticle()">💾 Salvar Matéria</button>
+    </div>
+
+    <!-- Tela de configurações de acessibilidade -->
+    <div class="settings-view" id="settingsView" style="display:none;">
+      <h2>⚙️ Acessibilidade Visual</h2>
+
+      <div class="setting-card">
+        <label>Tamanho da Fonte</label>
+        <div class="font-size-controls">
+          <button class="btn-circle" onclick="changeFontSize(-1)">A-</button>
+          <span class="font-size-value" id="fontSizeValue">100%</span>
+          <button class="btn-circle" onclick="changeFontSize(1)">A+</button>
+        </div>
+      </div>
+
+      <div class="setting-card">
+        <label>Espaçamento entre Linhas</label>
+        <div class="line-height-controls">
+          <button class="btn-pill" onclick="setLineHeight(1.4)">Compacto</button>
+          <button class="btn-pill active" onclick="setLineHeight(1.8)">Normal</button>
+          <button class="btn-pill" onclick="setLineHeight(2.4)">Amplo</button>
+        </div>
+      </div>
+
+      <div class="setting-card">
+        <label>Largura do Texto</label>
+        <div class="width-controls">
+          <button class="btn-pill" onclick="setTextWidth('narrow')">Estreita</button>
+          <button class="btn-pill active" onclick="setTextWidth('normal')">Normal</button>
+          <button class="btn-pill" onclick="setTextWidth('wide')">Larga</button>
+        </div>
+      </div>
+
+      <div class="setting-card">
+        <label>Modo de Cores</label>
+        <div class="theme-controls">
+          <button class="btn-pill active" onclick="setTheme('dark')">🌙 Escuro</button>
+          <button class="btn-pill" onclick="setTheme('light')">☀️ Claro</button>
+          <button class="btn-pill" onclick="setTheme('sepia')">📜 Sépia</button>
+          <button class="btn-pill" onclick="setTheme('contrast')">⚫ Alto Contraste</button>
+        </div>
+      </div>
+
+      <div class="setting-card">
+        <label>Fonte</label>
+        <div class="font-family-controls">
+          <button class="btn-pill active" onclick="setFontFamily('system')">Padrão</button>
+          <button class="btn-pill" onclick="setFontFamily('dyslexic')">Dislexia</button>
+          <button class="btn-pill" onclick="setFontFamily('serif')">Serifada</button>
+        </div>
+      </div>
+
+      <button class="btn-danger btn-full" onclick="clearAllArticles()">🗑️ Limpar Todas as Matérias</button>
+    </div>
+  </main>
+
+  <!-- ===== BARRA DE NAVEGAÇÃO INFERIOR (ZONA DO POLEGAR) ===== -->
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="nav-btn active" onclick="showView('list')" data-view="list">
+      <span class="nav-icon">📚</span>
+      <span class="nav-label">Matérias</span>
+    </button>
+    <button class="nav-btn" onclick="showView('add')" data-view="add">
+      <span class="nav-icon">➕</span>
+      <span class="nav-label">Adicionar</span>
+    </button>
+    <button class="nav-btn" onclick="showView('settings')" data-view="settings">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label">Ajustes</span>
+    </button>
+  </nav>
+
+  <!-- FAB flutuante na zona do polegar direito (adicionar rápido) -->
+  <button class="fab" id="fabAdd" onclick="showView('add')" aria-label="Adicionar matéria">
+    <span>➕</span>
+  </button>
+
+  <!-- Barra de ações do leitor (aparece ao ler) -->
+  <div class="reader-actions" id="readerActions" style="display:none;">
+    <button class="action-btn" onclick="speakArticle()" title="Ouvir">
+      🔊
+    </button>
+    <button class="action-btn" onclick="shareArticle()" title="Compartilhar">
+      📤
+    </button>
+    <button class="action-btn" onclick="deleteCurrentArticle()" title="Excluir">
+      🗑️
+    </button>
+    <button class="action-btn" onclick="backToList()" title="Voltar">
+      🔙
+    </button>
+  </div>
+
+  <!-- Toast notifications -->
+  <div class="toast" id="toast"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
